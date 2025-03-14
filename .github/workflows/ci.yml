@@ -1,0 +1,63 @@
+name: CI
+
+permissions:
+  contents: write
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up JQ
+        run: sudo apt-get install -y jq
+
+      - name: Run build script
+        run: bash build_collector.sh
+
+      - name: Delete existing latest release
+        run: |
+          gh release delete latest --yes || true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Delete old latest tag
+        run: |
+          git tag -d latest || true
+          git push --delete origin latest || true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+
+      - name: Create Latest Release
+        id: create_latest_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: latest
+          release_name: "Latest Release"
+          draft: false
+          prerelease: false
+
+      - name: Upload Latest Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_latest_release.outputs.upload_url }}
+          asset_path: ./datastore/Velociraptor_Triage_Collector.exe
+          asset_name: Velociraptor_Triage_Collector.exe
+          asset_content_type: application/octet-stream
