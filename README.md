@@ -6,13 +6,13 @@
 
 **triage.zip** provides an out-of-the-box Velociraptor triage collector for Windows, pre-configured for rapid and effective incident response. The project is intended for responders who need a reliable offline collector without the hassle of building from scratch.
 
-## Repo Contents and Workflow
-
 - **Automated Build and Deployment:**  
   Every commit to the `main` branch triggers a CI workflow (see [ci.yml](.github/workflows/ci.yml)) which:
   1. Fetches the latest Velociraptor Linux binary from its official release using a shell script.
   2. Generates an offline collector using the provided configuration ([spec.yaml](config/spec.yaml)).
   3. Deploys the collector as a GitHub release for easy download.
+  
+  In addition, a GitHub Action trigger now runs every Monday at 6pm UTC to ensure the collector is always built using the latest Velociraptor release version.
 
 - **Configuration:**  
   The collector behavior is defined in [spec.yaml](config/spec.yaml), detailing operating system, artifacts, collection parameters, and output settings.
